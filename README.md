@@ -10,4 +10,24 @@ Model selector Google Colab:
 https://colab.research.google.com/drive/1yeajPJW3vC4jW5FDX79xeH-_JFnTXNN0?usp=sharing
 
 
-### Further the uploded model has been divided into three files. The PPT has been uploaded seperately.
+# Sleep Quality Tracker
+
+## Overview
+
+## Features
+
+## Technologies Used
+
+## Dataset
+
+## Folder Structure
+
+## Installation
+
+## Usage
+
+## Results
+
+## Future Improvements
+
+## Author
