@@ -1,0 +1,14 @@
+Feature,Importance
+Light sleep percentage,0.4369975904203556
+Deep sleep percentage,0.3581647180526671
+Awakenings,0.15089226149096585
+Smoking status,0.028236836411528327
+Age,0.013338899630867387
+Alcohol consumption,0.005507107505928886
+Exercise frequency,0.0039517850633902125
+Wakeup_hour,0.0017255777862380038
+REM sleep percentage,0.001076671085941107
+Bedtime_hour,0.00010855255211747255
+Sleep duration,0.0
+Gender,0.0
+Caffeine consumption,0.0
