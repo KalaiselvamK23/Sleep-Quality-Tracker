@@ -79,7 +79,7 @@ with col2:
         min_value=0.0,
         max_value=20.0,
         value=1.0,
-        #step=1.0
+        step=1.0
     )
 
 with col3:
