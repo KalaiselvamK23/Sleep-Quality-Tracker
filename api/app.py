@@ -11,7 +11,6 @@ app = FastAPI(
 
 # load the trained model and scaler
 model = joblib.load("models/sleep_efficiency_model.pkl")
-scaler = joblib.load("models/scaler.pkl")
 
 class SleepData(BaseModel):
     Age: int
@@ -62,8 +61,8 @@ def predict_sleep_efficiency(data: SleepData):
         "Wakeup_hour"
     ])
 
-    input_scaled = scaler.transform(input_data)
-    prediction = model.predict(input_scaled)[0]
+    #input_scaled = scaler.transform(input_data)
+    prediction = model.predict(input_data)[0]
     prediction_percentage = prediction * 100
 
     if prediction_percentage >= 85:
