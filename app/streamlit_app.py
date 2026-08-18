@@ -2,6 +2,73 @@ import streamlit as st
 import requests
 from datetime import datetime
 import pandas as pd
+import os
+
+HISTORY_FILE = "data/sleep_history.csv"
+
+def generate_recommendations(
+    sleep_duration,
+    rem_sleep,
+    deep_sleep,
+    light_sleep,
+    awakenings,
+    caffeine,
+    alcohol,
+    smoking,
+    exercise
+):
+    recommendations = []
+
+    if sleep_duration < 7:
+        recommendations.append(
+            "Try to increase your sleep duration toward 7–9 hours."
+        )
+
+    if awakenings > 2:
+        recommendations.append(
+            "Frequent awakenings may affect sleep quality. "
+            "Try to maintain a quiet and comfortable sleep environment."
+        )
+
+    if caffeine > 5:
+        recommendations.append(
+            "Consider reducing caffeine consumption, especially later in the day."
+        )
+
+    if alcohol > 2:
+        recommendations.append(
+            "Reducing alcohol consumption may help improve sleep quality."
+        )
+
+    if smoking == "Yes":
+        recommendations.append(
+            "Reducing or avoiding smoking may support healthier sleep."
+        )
+
+    if exercise < 2:
+        recommendations.append(
+            "Regular physical activity may help improve sleep quality."
+        )
+
+    if rem_sleep < 20:
+        recommendations.append(
+            "Your REM sleep percentage is relatively low. "
+            "Maintaining a consistent sleep schedule may help."
+        )
+
+    if deep_sleep < 20:
+        recommendations.append(
+            "Your deep sleep percentage is relatively low. "
+            "Focus on a consistent bedtime and a comfortable sleep environment."
+        )
+
+    if not recommendations:
+        recommendations.append(
+            "Your sleep and lifestyle inputs look balanced. "
+            "Keep maintaining your current healthy habits."
+        )
+
+    return recommendations
 
 feature_importance = pd.read_csv(
     "data/feature_importance.csv"
@@ -12,6 +79,14 @@ st.set_page_config(
     page_icon="🌙",
     layout="wide"
 )
+
+if "sleep_history" not in st.session_state:
+    if os.path.exists(HISTORY_FILE):
+        st.session_state.sleep_history = pd.read_csv(
+            HISTORY_FILE
+        ).to_dict("records")
+    else:
+        st.session_state.sleep_history = []
 
 st.title("🌙 Sleep Quality Tracker")
 
@@ -146,6 +221,12 @@ with st.container(border=True):
     st.divider()
 
     if st.button("Predict Sleep Efficiency", type="primary"):
+        if rem_sleep + deep_sleep + light_sleep > 100:
+            st.error(
+                "REM, Deep, and Light sleep percentages "
+                "cannot total more than 100%."
+            )
+            st.stop()
         gender_value = 1 if gender == "Male" else 0
         smoking_value = 1 if smoking == "Yes" else 0
         bedtime_hour = bedtime.hour + bedtime.minute / 60
@@ -175,47 +256,119 @@ with st.container(border=True):
 
             if response.status_code == 200:
                 result = response.json()
+
+                st.session_state.sleep_history.append({
+                    "Date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "Sleep Efficiency": result["Sleep_efficiency_percentage"],
+                    "Sleep Quality": result["Sleep_quality"],
+                    "Sleep Duration": sleep_duration,
+                    "REM %": rem_sleep,
+                    "Deep Sleep %": deep_sleep,
+                    "Light Sleep %": light_sleep,
+                    "Awakenings": awakenings
+                })
+
+                history_df = pd.DataFrame(st.session_state.sleep_history)
+
+                history_df.to_csv(
+                    HISTORY_FILE,
+                    index=False
+                )
+
                 st.success("prediction completed successfully!")
                 st.subheader("Your Sleep Analysis")
 
-                quality = result["Sleep_quality"]
+                recommendations = generate_recommendations(
+                    sleep_duration,
+                    rem_sleep,
+                    deep_sleep,
+                    light_sleep,
+                    awakenings,
+                    caffeine,
+                    alcohol,
+                    smoking,
+                    exercise
+                )
+                st.subheader("🎯 Your Sleep Result")
 
-                if quality == "Excellent":
-                    recommendation = "Great job! Your predicted sleep quality is excellent. Keep maintaining your current sleep habits."
-                elif quality == "Good":
-                    recommendation = "Your predicted sleep quality is good. Continue maintaining consistent sleep and healthy lifestyle habits."
-                elif quality == "Moderate":
-                    recommendation = "Your predicted sleep quality is moderate. Consider improving sleep consistency, reducing disturbances, and maintaining healthy sleep habits."
-                else:
-                    recommendation = "Your predicted sleep quality needs improvement. Focus on consistent sleep schedules and healthier lifestyle habits."
-                
-                col1, col2 = st.columns(2)
+                st.subheader("🎯 Your Sleep Result")
+
+                with st.container(border=True):
+                    col1, col2 = st.columns([2, 1])
+
+                    with col1:
+                        st.markdown("### Sleep Efficiency")
+                        st.markdown(
+                            f"### {result['Sleep_efficiency_percentage']:.2f}%"
+                        )
+
+                        st.progress(
+                            min(
+                                int(result["Sleep_efficiency_percentage"]),
+                                100
+                            )
+                        )
+
+                    with col2:
+                        st.markdown("### Sleep Quality")
+                        st.markdown(
+                            f"### {result['Sleep_quality']}"
+                        )
+
+                    st.caption(
+                        "This score represents the predicted efficiency of your sleep."
+                    )
+
+                st.subheader("💡 Personalized Recommendations")
+
+                with st.expander(
+                    f"View {len(recommendations)} personalized recommendation(s)"
+                ):
+                    for recommendation in recommendations:
+                        st.info(recommendation)
+
+                st.subheader("🛌 Sleep Composition")
+
+                sleep_composition = pd.DataFrame({
+                    "Sleep Stage": ["REM", "Deep", "Light"],
+                    "Percentage": [rem_sleep, deep_sleep, light_sleep]
+                })
+
+                st.bar_chart(
+                    sleep_composition,
+                    x="Sleep Stage",
+                    y="Percentage"
+                )
+
+                st.subheader("📋 Sleep Metrics")
+
+                col1, col2, col3, col4 = st.columns(4)
 
                 with col1:
-                    st.metric(
-                        "Sleep Effficiency",
-                        f"{result['Sleep_efficiency_percentage']:.2f}%"
-                    )
+                    st.metric("Sleep Duration", f"{sleep_duration:.1f} hrs")
 
                 with col2:
-                    st.metric(
-                        "Sleep Quality",
-                        result["Sleep_quality"]
-                    )
+                    st.metric("REM Sleep", f"{rem_sleep}%")
 
-                st.progress(
-                    min(
-                        int(result["Sleep_efficiency_percentage"]),
-                        100
-                    )
+                with col3:
+                    st.metric("Deep Sleep", f"{deep_sleep}%")
+
+                with col4:
+                    st.metric("Awakenings", f"{awakenings:.0f}")
+
+
+                if result["Sleep_quality"] == "Excellent":
+                    interpretation = "Your predicted sleep efficiency is excellent. Your current sleep pattern appears to be supporting good sleep quality."
+                elif result["Sleep_quality"] == "Good":
+                    interpretation = "Your predicted sleep efficiency is good. Maintaining consistent sleep and healthy habits can help preserve it."
+                elif result["Sleep_quality"] == "Moderate":
+                    interpretation = "Your predicted sleep efficiency is moderate. Improving sleep duration, consistency, and lifestyle habits may help."
+                else:
+                    interpretation = "Your predicted sleep efficiency needs improvement. Focus on consistent sleep, reducing disturbances, and healthier lifestyle habits."
+
+                st.info(
+                    f"**Sleep Insight:** {interpretation}"
                 )
-
-                st.caption(
-                    f"Sleep efficiency score: "
-                    f"{result['Sleep_efficiency_percentage']:.2f}%"
-                )
-
-                st.info(recommendation)
 
                 st.divider()
                 with st.expander("About Your Prediction"):
@@ -247,4 +400,51 @@ with st.container(border=True):
             st.error(
                 "Could not connect to the Sleep quality Tracker API. "
                 "Make sure FasTAPI is running"
+            )
+
+
+# sleep history
+st.divider()
+
+st.subheader("📈 Sleep History")
+
+if st.session_state.sleep_history:
+    history_df = pd.DataFrame(st.session_state.sleep_history)
+
+    st.dataframe(
+        history_df,
+        hide_index=True,
+        use_container_width=True
+    )
+
+    if st.button("🗑️ Clear Sleep History"):
+        st.session_state.sleep_history = []
+
+        if os.path.exists(HISTORY_FILE):
+            os.remove(HISTORY_FILE)
+
+        st.success("Sleep history cleared successfully.")
+        st.rerun()
+
+    st.subheader("Sleep Efficiency Trend")
+
+    if st.session_state.sleep_history:
+        history_df = pd.DataFrame(st.session_state.sleep_history)
+
+        st.line_chart(
+            history_df,
+            x="Date",
+            y="Sleep Efficiency"
+        )
+
+    else:
+        st.info(
+            "No sleep history available yet."
+            "Make a prediction to start tracking. "
+        )
+
+    
+else:
+    st.info("No sleep history available yet."
+            "Make a prediction to start tracking."
             )

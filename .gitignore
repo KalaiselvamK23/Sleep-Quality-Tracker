@@ -22,3 +22,6 @@ Thumbs.db
 
 # testing cache 
 .coverage
+
+# test samples
+sleep_history.csv
