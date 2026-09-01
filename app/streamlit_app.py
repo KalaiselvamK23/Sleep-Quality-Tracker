@@ -5,6 +5,7 @@ import pandas as pd
 import os
 
 HISTORY_FILE = "data/sleep_history.csv"
+API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
 
 def generate_recommendations(
     sleep_duration,
@@ -257,7 +258,7 @@ with st.container(border=True):
 
         try:
             response = requests.post(
-                "http://127.0.0.1:8000/predict",
+                f"{API_URL}/predict",
                 json=payload
             )
 
