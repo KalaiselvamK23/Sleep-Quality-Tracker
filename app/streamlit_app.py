@@ -221,12 +221,19 @@ with st.container(border=True):
     st.divider()
 
     if st.button("Predict Sleep Efficiency", type="primary"):
-        if rem_sleep + deep_sleep + light_sleep > 100:
+        if rem_sleep + deep_sleep + light_sleep != 100:
             st.error(
                 "REM, Deep, and Light sleep percentages "
-                "cannot total more than 100%."
+                "must total exactly 100%."
             )
             st.stop()
+
+        if sleep_duration < 1 or sleep_duration > 16:
+            st.error(
+                "sleep duration must be between 1 and 16 hours."
+            )
+            st.stop()
+            
         gender_value = 1 if gender == "Male" else 0
         smoking_value = 1 if smoking == "Yes" else 0
         bedtime_hour = bedtime.hour + bedtime.minute / 60

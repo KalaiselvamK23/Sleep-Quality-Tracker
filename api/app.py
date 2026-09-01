@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import joblib
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 app = FastAPI(
     title="Sleep Quality Tracker App",
@@ -13,17 +13,17 @@ app = FastAPI(
 model = joblib.load("models/sleep_efficiency_model.pkl")
 
 class SleepData(BaseModel):
-    Age: int
+    Age: int = Field(..., ge=1, le=100)
     Gender: int
-    Sleep_duration: float
-    REM_sleep_percentage: int
-    Deep_sleep_percentage: int
-    Light_sleep_percentage: int
-    Awakenings: float
-    Caffeine_consumption: float
-    Alcohol_consumption: float
+    Sleep_duration: float = Field(..., ge=1, le=16)
+    REM_sleep_percentage: int = Field(..., ge=0, le=100)
+    Deep_sleep_percentage: int = Field(..., ge=0, le=100)
+    Light_sleep_percentage: int = Field(..., ge=0, le=100)
+    Awakenings: float = Field(..., ge=0, le=20)
+    Caffeine_consumption: float = Field(..., ge=0, le=20)
+    Alcohol_consumption: float = Field(..., ge=0, le=20)
     Smoking_status: int
-    Exercise_frequency: float
+    Exercise_frequency: float = Field(..., ge=0, le=20)
     Bedtime_hour: float
     Wakeup_hour: float
 
