@@ -5,7 +5,7 @@
 ![Tests](https://img.shields.io/badge/Tests-8%20Passed-success)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-[🚀 Live Demo](https://sleep-quality-tracker-2smetxsupaxucux95svsk4.streamlit.app/) 
+[🚀 Live Demo](https://sleep-quality-tracker-aaea72nc4qsdhmo7gqwyuv.streamlit.app/) 
 [📡 API](https://sleep-quality-api.onrender.com/)
 [📖 API Docs](https://sleep-quality-api.onrender.com/docs)
 
