@@ -1,3 +1,14 @@
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.141.1-009688?logo=fastapi)
+![Streamlit](https://img.shields.io/badge/Streamlit-Cloud-FF4B4B?logo=streamlit)
+![Scikit-learn](https://img.shields.io/badge/Scikit--learn-1.9.0-F7931E?logo=scikit-learn)
+![Tests](https://img.shields.io/badge/Tests-8%20Passed-success)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+[🚀 Live Demo](https://sleep-quality-tracker-2smetxsupaxucux95svsk4.streamlit.app/) 
+[📡 API](https://sleep-quality-api.onrender.com/)
+[📖 API Docs](https://sleep-quality-api.onrender.com/docs)
+
 # Sleep Quality Tracker
 
 A machine learning-based web application that predicts sleep efficiency and classifies overall sleep quality based on sleep patterns and lifestyle factors.
@@ -481,3 +492,7 @@ Possible future improvements include:
 GitHub:
 
 [https://github.com/KalaiselvamK23/Sleep-Quality-Tracker](https://github.com/KalaiselvamK23/Sleep-Quality-Tracker)
+
+## 📄 License
+
+This project is licensed under the MIT License.
