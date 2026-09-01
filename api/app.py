@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 import joblib
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
+from pathlib import Path
+
 
 app = FastAPI(
     title="Sleep Quality Tracker App",
@@ -10,22 +12,41 @@ app = FastAPI(
 )
 
 # load the trained model and scaler
-model = joblib.load("models/sleep_efficiency_model.pkl")
+BASE_DIR = Path(__file__).resolve().parent.parent
+MODEL_PATH = BASE_DIR / "models" / "sleep_efficiency_model.pkl"
+
+model = joblib.load(MODEL_PATH)
+
 
 class SleepData(BaseModel):
-    Age: int
+    Age: int = Field(..., ge=1, le=100)
     Gender: int
-    Sleep_duration: float
-    REM_sleep_percentage: int
-    Deep_sleep_percentage: int
-    Light_sleep_percentage: int
-    Awakenings: float
-    Caffeine_consumption: float
-    Alcohol_consumption: float
+    Sleep_duration: float = Field(..., ge=1, le=16)
+    REM_sleep_percentage: int = Field(..., ge=0, le=100)
+    Deep_sleep_percentage: int = Field(..., ge=0, le=100)
+    Light_sleep_percentage: int = Field(..., ge=0, le=100)
+    Awakenings: float = Field(..., ge=0, le=20)
+    Caffeine_consumption: float = Field(..., ge=0, le=20)
+    Alcohol_consumption: float = Field(..., ge=0, le=20)
     Smoking_status: int
-    Exercise_frequency: float
+    Exercise_frequency: float = Field(..., ge=0, le=20)
     Bedtime_hour: float
     Wakeup_hour: float
+    @model_validator(mode="after")
+    def validate_sleep_percentages(self):
+        total = (
+            self.REM_sleep_percentage
+            + self.Deep_sleep_percentage
+            + self.Light_sleep_percentage
+        )
+
+        if total > 100:
+            raise ValueError(
+                "REM, Deep, and Light sleep percentages "
+                "cannot total more than 100%."
+            )
+
+        return self
 
 
 @app.post("/predict")

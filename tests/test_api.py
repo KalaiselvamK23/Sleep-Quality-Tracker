@@ -47,7 +47,7 @@ def test_high_sleep_quality_prediction():
         "Gender": 1,
         "Sleep_duration": 8,
         "REM_sleep_percentage": 25,
-        "Deep_sleep_percentage": 80,
+        "Deep_sleep_percentage": 65,
         "Light_sleep_percentage": 10,
         "Awakenings": 0,
         "Caffeine_consumption": 0,
@@ -170,3 +170,24 @@ def test_home_endpoint():
 
     assert response.status_code == 200
     assert response.json()["message"] == "Sleep Quality Tracker API is running"
+
+def test_invalid_sleep_percentage_total():
+    payload = {
+        "Age": 30,
+        "Gender": 1,
+        "Sleep_duration": 8,
+        "REM_sleep_percentage": 20,
+        "Deep_sleep_percentage": 25,
+        "Light_sleep_percentage": 65,
+        "Awakenings": 0,
+        "Caffeine_consumption": 0,
+        "Alcohol_consumption": 0,
+        "Smoking_status": 0,
+        "Exercise_frequency": 5,
+        "Bedtime_hour": 22,
+        "Wakeup_hour": 6
+    }
+
+    response = client.post("/predict", json=payload)
+
+    assert response.status_code == 422
